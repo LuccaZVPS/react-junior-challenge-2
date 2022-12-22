@@ -1,34 +1,58 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import { useEffect, useRef, useState } from "react";
 
+interface ball {
+  x: number;
+  y: number;
+}
 function App() {
-  const [count, setCount] = useState(0)
+  const container = useRef(null as unknown as HTMLDivElement);
+  const [balls, setBalls] = useState<ball[]>([]);
+  const [removed, setRemoved] = useState<ball[]>([]);
 
+  const createBall = (ball: ball) => {
+    var newList = [];
+    newList.push(...balls, ball);
+    setBalls(newList);
+  };
+
+  const removeBall = () => {
+    if (balls.length === 0) {
+      return;
+    }
+    var newList = [...balls];
+    var removedBall = newList.pop() as unknown as ball;
+    setBalls([...newList]);
+    setRemoved([...removed, removedBall]);
+  };
+  const returnBall = () => {
+    if (removed.length === 0) {
+      return;
+    }
+    var newList = [...removed];
+    var returnBall = newList.pop() as unknown as ball;
+    setBalls([...balls, returnBall]);
+    setRemoved([...newList]);
+  };
+  console.log(removed);
   return (
     <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className="buttons">
+        <button onClick={removeBall}>Undo</button>
+        <button onClick={returnBall}>Redo</button>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+      <div
+        className="game-container"
+        ref={container}
+        onClick={(e) => {
+          createBall({ x: e.pageX, y: e.pageY - 50 });
+        }}
+      >
+        {balls.map((ball) => (
+          <span style={{ top: `${ball.y}px`, left: `${ball.x}px` }}></span>
+        ))}
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
